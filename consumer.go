@@ -20,8 +20,8 @@ import (
 
 const (
 	topic1 = "dbserver1.bank.tbl_user_pin"
-	topic2 = "dbserver1.bank.tbl_brimo_activation"
-	topic3 = "dbserver1.bank.tbl_brimo_activation_mnt_log"
+	topic2 = "dbserver1.bank.tbl_activation"
+	topic3 = "dbserver1.bank.tbl_activation_mnt_log"
 )
 
 var (
@@ -109,25 +109,25 @@ func main() {
 	}
 	defer stmtUpd1.Close()
 
-	// Insert dan update tabel tbl_brimo_activation
-	stmtIns2, err = db.Prepare("INSERT INTO tbl_brimo_activation (`id`,`lokasi`,`alasan`) VALUES(?,?,?)")
+	// Insert dan update tabel tbl_activation
+	stmtIns2, err = db.Prepare("INSERT INTO tbl_activation (`id`,`lokasi`,`alasan`) VALUES(?,?,?)")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer stmtIns2.Close()
-	stmtUpd2, err = db.Prepare("UPDATE tbl_brimo_activation SET lokasi=?, alasan=? WHERE id=?")
+	stmtUpd2, err = db.Prepare("UPDATE tbl_activation SET lokasi=?, alasan=? WHERE id=?")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer stmtUpd2.Close()
 
-	// Insert dan update tabel tbl_brimo_activation_mnt_log
-	stmtIns3, err = db.Prepare("INSERT INTO tbl_brimo_activation_mnt_log (`id`,`LokasiLog`,`AlasanPenghapusan`,`date`) VALUES(?,?,?,?)")
+	// Insert dan update tabel tbl_activation_mnt_log
+	stmtIns3, err = db.Prepare("INSERT INTO tbl_activation_mnt_log (`id`,`LokasiLog`,`AlasanPenghapusan`,`date`) VALUES(?,?,?,?)")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer stmtIns3.Close()
-	stmtUpd3, err = db.Prepare("UPDATE tbl_brimo_activation_mnt_log SET LokasiLog=?, AlasanPenghapusan=?, date=? WHERE id=?")
+	stmtUpd3, err = db.Prepare("UPDATE tbl_activation_mnt_log SET LokasiLog=?, AlasanPenghapusan=?, date=? WHERE id=?")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -269,21 +269,21 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 				// Execute the query
 				id := getdata.Before.ID
 				var ids int
-				row := db.QueryRow("SELECT id FROM tbl_brimo_activation WHERE id=?", id)
+				row := db.QueryRow("SELECT id FROM tbl_activation WHERE id=?", id)
 				err := row.Scan(&ids)
 				if err != nil {
 					_, err = stmtIns2.Exec(getdata.Before.ID, getdata.Before.Lokasi, getdata.Before.Alasan)
 					if err != nil {
 						panic(err.Error())
 					} else {
-						fmt.Println("Insert Record tabel tbl_brimo_activation Push To Database")
+						fmt.Println("Insert Record tabel tbl_activation Push To Database")
 					}
 				} else {
 					_, err = stmtUpd2.Exec(getdata.Before.Lokasi, getdata.Before.Alasan, getdata.Before.ID)
 					if err != nil {
 						panic(err.Error())
 					} else {
-						fmt.Println("Update Record tabel tbl_brimo_activation Push To Database where id", getdata.Before.ID, "Lokasi =", getdata.Before.Lokasi, "Alasan =", getdata.Before.Alasan)
+						fmt.Println("Update Record tabel tbl_activation Push To Database where id", getdata.Before.ID, "Lokasi =", getdata.Before.Lokasi, "Alasan =", getdata.Before.Alasan)
 					}
 				}
 			}
@@ -297,7 +297,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 				// Execute the query
 				id := getdata.Before.ID
 				var ids int
-				row := db.QueryRow("SELECT id FROM tbl_brimo_activation_mnt_log WHERE id=?", id)
+				row := db.QueryRow("SELECT id FROM tbl_activation_mnt_log WHERE id=?", id)
 				err := row.Scan(&ids)
 				if err != nil {
 					// convert date milisecond to datetime
@@ -308,7 +308,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 					if err != nil {
 						panic(err.Error())
 					} else {
-						fmt.Println("Insert Record tabel tbl_brimo_activation_mnt_log Push To Database")
+						fmt.Println("Insert Record tabel tbl_activation_mnt_log Push To Database")
 					}
 				} else {
 					// convert date milisecond to datetime
@@ -319,7 +319,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 					if err != nil {
 						panic(err.Error())
 					} else {
-						fmt.Println("Update Record tabel tbl_brimo_activation_mnt_log Push To Database where id =", getdata.Before.ID, "Lokasi Log =", getdata.Before.LokasiLog, "Alasan Penghapusan =", getdata.Before.AlasanPenghapusan, "Tanggal =", tm2.In(loc).Format("2006-01-02 15:04:05"))
+						fmt.Println("Update Record tabel tbl_activation_mnt_log Push To Database where id =", getdata.Before.ID, "Lokasi Log =", getdata.Before.LokasiLog, "Alasan Penghapusan =", getdata.Before.AlasanPenghapusan, "Tanggal =", tm2.In(loc).Format("2006-01-02 15:04:05"))
 					}
 				}
 			}
